@@ -14,30 +14,30 @@
             <td @click="clearField">C</td>
             <td @click="turnNegative">+/-</td>
             <td @click="percent">%</td>
-            <td class="lastCol" @click="divide">/</td>
+            <td class="lastCol" @click="process('divide')">/</td>
           </tr>
           <tr>
             <td @click="getNumber('7')">7</td>
             <td @click="getNumber('8')">8</td>
             <td @click="getNumber('9')">9</td>
-            <td class="lastCol" @click="multiple">&#x0078;</td>
+            <td class="lastCol" @click="process('multiply')">&#x0078;</td>
           </tr>
           <tr>
             <td @click="getNumber('4')">4</td>
             <td @click="getNumber('5')">5</td>
             <td @click="getNumber('6')">6</td>
-            <td class="lastCol" @click="minus">-</td>
+            <td class="lastCol" @click="process('minus')">-</td>
           </tr>
           <tr>
             <td @click="getNumber('1')">1</td>
             <td @click="getNumber('2')">2</td>
             <td @click="getNumber('3')">3</td>
-            <td class="lastCol" @click="plus">+</td>
+            <td class="lastCol" @click="process('plus')">+</td>
           </tr>
           <tr>
             <td colspan="2" @click="getNumber('0')">0</td>
             <td @click="addDot">.</td>
-            <td class="lastCol" @click="calculate">=</td>
+            <td class="lastCol" @click="equal">=</td>
           </tr>
         </tbody>
       </table>
@@ -53,8 +53,9 @@ export default {
   data() {
     return {
       output: "",
-      prev: '',
+      prev: null,
       operationFired: false,
+      hasOp: false,
     };
   },
   methods: {
@@ -80,36 +81,42 @@ export default {
         this.output += '.';
       }
     },
-    storeAndClear() {
+    process(op) {
+      switch (op) {
+        case 'plus':
+          this.operation = (a, b) => {
+            return +a + +b;
+          }
+          break;
+        case 'minus':
+          this.operation = (a, b) => {
+            return +a - +b;
+          }
+          break;
+        case 'multiply':
+          this.operation = (a, b) => {
+            return +a * +b;
+          }
+          break;
+        case 'divide':
+          this.operation = (a, b) => {
+            return +a / +b;
+          }
+          break;
+        default:
+          console.log('wtf');
+          break;
+      }
+      
       this.prev = this.output;
       this.operationFired = true;
+      this.hasOp = true;
     },
-    plus() {
-      this.operation = (a, b) => {
-        return +a + +b;
+    equal() {
+      if (this.hasOp) {
+        this.output = this.operation(+this.prev, +this.output);
+        this.hasOp = false;
       }
-      this.storeAndClear();
-    },
-    minus() {
-      this.operation = (a, b) => {
-        return +a - +b;
-      }
-      this.storeAndClear();
-    },
-    multiple() {
-      this.operation = (a, b) => {
-        return +a * +b;
-      }
-      this.storeAndClear();
-    },
-    divide() {
-      this.operation = (a, b) => {
-        return +a / +b;
-      }
-      this.storeAndClear();
-    },
-    calculate() {
-      this.output = this.operation(+this.prev, +this.output);
     },
   },
 };
@@ -139,7 +146,7 @@ a {
   background-color: orange;
   color: #fff;
 }
-.lastCol:active {
+td:active {
   background-color: #333;
   color: #fff;
 }
